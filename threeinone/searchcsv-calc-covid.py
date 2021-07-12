@@ -1,4 +1,5 @@
 # import everything
+import os
 from tkinter import * 
 from tkinter import filedialog as fd
 from tkinter import messagebox
@@ -8,22 +9,22 @@ import tkinter
 from typing import final
 
 
+
+
 # importing webbrowser python module
 import webbrowser
 
 root = Tk() # set root variable to Tk()
 root.title("Welcome") # set title of root to "Full Program"
-# icon doesnt work
-
-# assign an image to image using filepath and photoimage method from tkinter
-# pack image to imageLabel
+global r
 
 
-labelWelcomeRoot = Label(root, text="Welcome to my Software Development Project \n select the program you want from the program menu", pady=14)
-labelWelcomeRoot.pack()
+labelWelcomeRoot = Label(root, text="Welcome to my Software Development Project", pady=14) # assign label
+labelWelcomeRoot.pack() # pack the label to root
 buttonQuit = Button(root, text="Exit Program", command=root.quit) # assign button() widget to buttonQuit variable, put it in root, set text and set the command to root.quit, so the program closes when you press this
 buttonQuit.pack()
-#class to create instance from to make windows
+
+#class to create instance to make windows from
 class Window(Toplevel):
     def __init__(self, parent):
         super().__init__(parent)
@@ -44,97 +45,6 @@ def window1():
     dataFilePath = "" # put empty string in dataFilePath.
     searchFieldValues = [] # put empty list in dataFilePath. 
     
-    def createMainUI(): # define a function called createMainUI()
-        global MainWindow # set a global variable called MainWindow
-        
-        MainWindow = Window(root) # assign Window(root) widget to MainWindow Variable
-        MainWindow.title("Welcome to Search")# run title method to set title of the window to "welcome to search"
-        
-        #set two label widgets in variable welcomeInfo and welcomeInfo2, set text and then grid them to row 0 and row1, set columnspan to two so they take up two columns
-        welcomeInfo = Label(MainWindow, text="Welcome to Search Program 1.0").grid(row=0, column=0, columnspan=2)
-        welcomeInfo2 = Label(MainWindow, text="Please Open File to search through a file of your choice").grid(row=1, column=0, columnspan=2)
-        # set two buttons, one to open file and one to continue by assigning buttons to the openFileButton variable and continueButton variable. These buttons go on the main window and they run command functions 1 called getFiledetails() with the filename passed into it and the other command function opens the searchFieldsUI window
-        # so when you click these buttons the command functions run. the openFileButton uses a lambda which allows us to pass in an argument into the parameter where it wouldnt normally be able to
-        openFileButton = Button(MainWindow, text="Open File", command=lambda: getFileDetails("fileName")).grid(row=2, column=0, columnspan=2)
-        continueButton = Button(MainWindow, text="Continue", command=createSearchFieldsUI).grid(row=6, column=1)
-        quitButton = Button(MainWindow, text="Quit", command=root.quit).grid(row=6, column=0) # this button quits root, and shuts down the program.
-        
-
-    def createSearchFieldsUI(): # this defines a function called createSearchFieldsUI()
-
-        SearchFieldsWindow = Window(root) # assign window widget with it set to root and assign to the SearchFieldsWindow variable
-        SearchFieldsWindow.title("Search Fields Window") # set title with .title() method which takes a string
-
-        headerList = lineGetter("firstLine") # this is a function caleld lineGetter which gets the first line of the csv file in this case as i passed in 'firstLine' as an argument the inner workings of the function caused the linegetter to return different data based on an if statement logic. puts the first line of the csv file into headerList.
-        
-        for i in range(len(headerList)): # a for loop that iterates over the indexes of headerlist
-            searchFieldLabel = Label(SearchFieldsWindow, text=headerList[i].title()).grid(row=i, column=0) # sets a label to the left its textis the current iteration of headerlist. which is headerlist[i]
-            searchField = Entry(SearchFieldsWindow, textvariable=StringVar()) # sets a entrybox to the right
-            searchField.grid(row=i, column=1) # puts the entry box on the grid
-            searchFieldValues.append(searchField) # puts the values from the searchfields into the searchField Values global variable
-        searchButton = Button(SearchFieldsWindow, text="SEARCH", command=createResultListUI).grid(row=len(headerList)+1, column=0, columnspan=2, padx=10, pady=10) 
-        # the search button is placed with grid on after the entry box it takes the function commandListUI into the button command= so when you press it the command is run
-    
-    def createResultListUI():
-        global resultListBox # make global variable list box
-        global searchResultWindow # make global the search result window so its accessible from other functions
-        fieldToString = [] # put empty list inside the fieldToString variable I Will append later the search field Values to it and casefold it so its not case sensitive.
-        productsList = lineGetter("withoutHeader") # this stores the return from lineGetter("withoutHeader") into the products list in this case we want the csv as a multi dimensional array without the headers in the first row
-        resultList = [] # this stores and empty list where will append every matching result 
-        searchResultWindow = Window(root) # this creates a instance of Window(root), basically makes a new window when the createResultListUI function is run
-        searchResultWindow.title("Search result display window") # # sets the title
-
-        resultListBox = Listbox(searchResultWindow) # sets the resultListBox variable with a list box
-        resultListBox.config(width=100, height=28) # configures teh resultListBox with width and height of 100 and 28
-
-
-        for i in range(len(searchFieldValues)): # this for loop goes through the indexes of searchFieldValues and inserts the contents of searchFieldValues into field to string after getting the value from the StringVar() and then casefolding to remove case sensitivity
-            fieldToString.insert(i, searchFieldValues[i].get().casefold()) 
-        
-        for item in productsList[:]: # this for loop makes a copy of products list and then goes through its rows and each item in each row, then goes through the entries stored in the fieldToString variable.
-            for i in range(len(item)):
-                for x in range(len(fieldToString)):
-                    term = fieldToString[x]
-                    if i == x: # makes sure the index of the item in each row matches the index of the search field Entry in fieldtoString.
-                        if term != '': # this makes sure the search term in field to string does not equal an empty string then moves on to the next if statement
-                            if (term in item[i].casefold()) or (term != item[i].casefold()):
-                                resultList.append(item) # this appends the row inside products list into the resultList IF the search term is 'in' the item in row of the same index as teh search term
-
-        for resultItem in resultList[:]: # this for loop is the very similar to the one above it goes through the loop if indexes match then test to see if the removal term in the fieldToString matches the result items
-            for i in range(len(resultItem)):
-                for x in range(len(fieldToString)):
-                    removalTerm = fieldToString[x]
-                    if i == x and removalTerm != '':
-                        if removalTerm not in resultItem[i].casefold():
-                            for thing in resultList[:]: # then for everything in a copy of result list if the thing is exactly equal to the resultItem then remove the thing (the row) from result list
-                                if thing == resultItem:
-                                    resultList.remove(thing)
-
-
-
-        
-        for i in range(len(resultList)):
-            resultListBox.insert(END, resultList[i]) # go through the result list and put them into the result list box one by one using the loop to insert them at the END.
-
-        resultListBox.grid(row=0, column=0, padx=40, pady=60) # place the listbox that holds results on the grid
-        viewDetailButton = Button(searchResultWindow, text="View Information", command=viewDetail).grid(row=1, column=0, columnspan=2)# put a button under the resultListbox which is called view information and has teh command viewDetail
-
-    def viewDetail(): # this is the function that runs when you press the view Information button on the window with the result list box  
-        resultAnchorBox = [] # put empty list inside resultAnchorBox
-        resultAnchor = resultListBox.get(ANCHOR) # get each anchor resultListBox to this variable resultAnchor
-        firstRow = lineGetter("firstLine") # use the lineGetter() function to get the firstRow
-        headingList = [] # put empty list inside headeringList
-
-        for item in resultAnchor: # for every item in the resultAnchor which has the resultListbox anchors # append a string of the item in resultAnchor to the resultAnchorBox which is a list
-            resultAnchorBox.append(str(item)) 
-        
-
-        for item in firstRow: # append each item in the firstRow of the CSV, the headers, to the headingList as a string.
-            headingList.append(str(item))
-        
-        for i in range(len(resultAnchorBox)): # this for loop goes over the indexes of the resultAnchorBox and puts each result item next to the heading on each iteration as a label widget on the grid.
-            selectedProductInfo = Label(searchResultWindow, text=f"{headingList[i]} : {resultAnchorBox[i]}", justify='left', anchor="w", font=('Courier', 17))
-            selectedProductInfo.grid(row=i+2, column=0, columnspan=2)
 
     def delimiterDeterminer(): # this function determines delimiter
         delimiter = '' # first set delimiter variable to empty string
@@ -148,7 +58,7 @@ def window1():
             f.close() # close the file that was opened
         return delimiter # returns the delimiter so you can use it in other functions
 
-            
+
     def lineGetter(choice): # this function gets the list of lines that you want from the csv after taking in a string as a choice in the parameter 'choice'. I made this so it was easier to handle the file and have access to teh headers and the rest of the file. this makes it easier to work with any file.
         global linesList # set linesList as a global
         linesList = [] # put empty list in linesList 
@@ -174,6 +84,143 @@ def window1():
         else:
             print("Please enter argument in choice parameter: 'firstLine' or 'allLines' or 'withoutHeader'.") # prints error message instructing the user if nothing is passed in
     
+
+    def createMainUI(): # define a function called createMainUI()
+        global MainWindow # set a global variable called MainWindow
+        
+        MainWindow = Window(root) # assign Window(root) widget to MainWindow Variable
+        MainWindow.title("Welcome to Search")# run title method to set title of the window to "welcome to search"
+        
+        #set two label widgets in variable welcomeInfo and welcomeInfo2, set text and then grid them to row 0 and row1, set columnspan to two so they take up two columns
+        welcomeInfo = Label(MainWindow, text="Welcome to Search Program 2.0").grid(row=0, column=0, columnspan=2)
+        welcomeInfo2 = Label(MainWindow, text="Please Open File to search through a file of your choice").grid(row=1, column=0, columnspan=2)
+        # set two buttons, one to open file and one to continue by assigning buttons to the openFileButton variable and continueButton variable. These buttons go on the main window and they run command functions 1 called getFiledetails() with the filename passed into it and the other command function opens the searchFieldsUI window
+        # so when you click these buttons the command functions run. the openFileButton uses a lambda which allows us to pass in an argument into the parameter where it wouldnt normally be able to
+        openFileButton = Button(MainWindow, text="Open File", command=lambda: getFileDetails("fileName")).grid(row=2, column=0, columnspan=2)
+        continueButton = Button(MainWindow, text="Continue", command=createSearchFieldsUI).grid(row=6, column=1)
+        quitButton = Button(MainWindow, text="Quit", command=root.quit).grid(row=6, column=0) # this button quits root, and shuts down the program.
+        
+
+    def createSearchFieldsUI(): # this defines a function called createSearchFieldsUI()
+        global radioValue
+        global r
+        SearchFieldsWindow = Window(root) # assign window widget with it set to root and assign to the SearchFieldsWindow variable
+        SearchFieldsWindow.title("Search Fields Window") # set title with .title() method which takes a string
+
+        headerList = lineGetter("firstLine") # this is a function caleld lineGetter which gets the first line of the csv file in this case as i passed in 'firstLine' as an argument the inner workings of the function caused the linegetter to return different data based on an if statement logic. puts the first line of the csv file into headerList.
+        itemList = lineGetter("withoutHeader")
+        nestedDDList = createNestedListOfDropDownItems()
+        # ADD DROPDOWNS
+        r = IntVar()
+        r.set(1)
+        
+        
+        for i in range(len(headerList)): # a for loop that iterates over the indexes of headerlist
+            searchFieldLabel = Label(SearchFieldsWindow, text=headerList[i].title()).grid(row=i, column=0) # sets a label to the left its textis the current iteration of headerlist. which is headerlist[i]
+            searchField = Entry(SearchFieldsWindow, textvariable=StringVar()) # sets a entrybox to the right
+            searchField.grid(row=i, column=1) # puts the entry box on the grid
+            searchFieldValues.append(searchField) # puts the values from the searchfields into the searchField Values global variable
+        radioButtonExact = Radiobutton(SearchFieldsWindow, text="Exact Match", variable=r, value=1, command=lambda: our_command).grid(row=len(headerList)+1, columnspan=2)
+        radioButtonApproximate = Radiobutton(SearchFieldsWindow, text="Approximate Match", variable=r, value=2, command=lambda: our_command).grid(row=len(headerList)+2, columnspan=2)
+        searchButton = Button(SearchFieldsWindow, text="SEARCH", command=createResultListUI).grid(row=len(headerList)+3, column=0, columnspan=2, padx=10, pady=10) 
+        # the search button is placed with grid on after the entry box it takes the function commandListUI into the button command= so when you press it the command is run
+        
+    
+    def createNestedListOfDropDownItems(): # this function sees if there are duplicates in that particular column if there are then true
+        headerList = lineGetter("firstLine")
+        itemList = lineGetter("withoutHeader")
+        dictFromHeaders = dict.fromkeys(headerList, 0)
+        itemListByIndex = []
+        #dictFromHeaders[headerList[5]]
+        noDupesList = []
+        for i in range(len(headerList)): 
+            itemListByIndex.append(list())# make as many empty lists as there are headers
+
+        for i in range(len(itemListByIndex)): # go over itemlist by index
+            for item in itemList: # for every row in itemList
+                for x in range(len(item)): # go through indexes of item
+                    if i == x:# test if the indexes are the same
+                        itemListByIndex[i].append(item[x]) # append the item's column to the itemlist by indexes relevant empty list
+        
+        for item in itemListByIndex:
+            noDupesList.append(list(dict.fromkeys(item))) # remove the duplicates with this line
+        
+        return noDupesList # returns a list of the items in itemlist in their ownlist after removing duplicates
+
+        
+        
+    
+
+    def createResultListUI():
+        global radioValue
+        global resultListBox # make global variable list box
+        global searchResultWindow # make global the search result window so its accessible from other functions
+        fieldToString = [] # put empty list inside the fieldToString variable I Will append later the search field Values to it and casefold it so its not case sensitive.
+        itemList = lineGetter("withoutHeader") # this stores the return from lineGetter("withoutHeader") into the products list in this case we want the csv as a multi dimensional array without the headers in the first row
+        resultList = [] # this stores and empty list where will append every matching result 
+        searchResultWindow = Window(root) # this creates a instance of Window(root), basically makes a new window when the createResultListUI function is run
+        searchResultWindow.title("Search result display window") # # sets the title
+        resultListBox = Listbox(searchResultWindow) # sets the resultListBox variable with a list box
+        resultListBox.config(width=100, height=28) # configures teh resultListBox with width and height of 100 and 28
+        radioValue = r.get() # get radio value from radiobuttons
+        exactMatches = [] # two lists one for exact matches and one for approx mat
+        approxMatches = []
+
+        for i in range(len(searchFieldValues)): # this for loop goes through the indexes of searchFieldValues and inserts the contents of searchFieldValues into field to string after getting the value from the StringVar() and then casefolding to remove case sensitivity
+            fieldToString.insert(i, searchFieldValues[i].get().lower()) # insert a lowered version of the item in the searchFieldValues
+        
+        with open(dataFilePath, newline='',) as f: # open data file as f
+            reader = csv.reader(f, skipinitialspace=True, delimiter=delimiterDeterminer()) #read opened file, f, into csv.reader and assign to reader variable
+
+            for row in reader: # go over every row in reader
+                exactMatch = True # set boolean, exactMatch, to True
+                passes = True # set another boolean, passes, to True
+                for i in range(len(fieldToString)): # go over a list of things you typed into the entries
+                    inputVal = fieldToString[i] # put current iteration of fieldToString which is a searchterm into the inputVal while maintaining its index position
+                    rowVal = row[i].lower() # set current iteration of the column of the row to rowVal but lower it before assignment
+                    if inputVal == '' or inputVal == rowVal: # if the input value this current iteration is not an empty string or it is equal to the value in row that is in the same index
+                        continue # continue to next iteration of loop
+                    elif inputVal != '' and inputVal in rowVal: # if input value is not equal to empty string AND the inputVal is IN rowval ('in' is not the same as '==')
+                        exactMatch = False # change the boolean to False if above condiition is met, the means that beyond this point in the loop it cannot be an exactMatch 
+                    else:
+                        exactMatch = False # if no conditions are met then both exact match and passes are False and we exit the inner loop naturally back to the ifstatments in the outer loop
+                        passes = False
+                if passes and exactMatch: # if both passes and exactMatch are equal to True
+                    exactMatches.append(row) #then append to exactMatches list because it passed as an exact math 
+                elif passes:
+                    approxMatches.append(row) # however if it passes without exactMatch being true then it goes into approxMAtches list
+                
+
+        if radioValue == 1:
+            for i in range(len(exactMatches)):
+                resultListBox.insert(END, exactMatches[i])
+        elif radioValue == 2:
+            for i in range(len(approxMatches)):
+                resultListBox.insert(END, approxMatches[i]) # go through the result list and put them into the result list box one by one using the loop to insert them at the END.
+
+        resultListBox.grid(row=0, column=0, padx=40, pady=60) # place the listbox that holds results on the grid
+        viewDetailButton = Button(searchResultWindow, text="View Information", command=viewDetail).grid(row=1, column=0, columnspan=2)# put a button under the resultListbox which is called view information and has teh command viewDetail
+
+    def viewDetail(): # this is the function that runs when you press the view Information button on the window with the result list box  
+        resultAnchorBox = [] # put empty list inside resultAnchorBox
+        resultAnchor = resultListBox.get(ANCHOR) # get each anchor resultListBox to this variable resultAnchor
+        firstRow = lineGetter("firstLine") # use the lineGetter() function to get the firstRow
+        headingList = [] # put empty list inside headeringList
+
+        for item in resultAnchor: # for every item in the resultAnchor which has the resultListbox anchors # append a string of the item in resultAnchor to the resultAnchorBox which is a list
+            resultAnchorBox.append(str(item)) 
+        
+
+        for item in firstRow: # append each item in the firstRow of the CSV, the headers, to the headingList as a string.
+            headingList.append(str(item))
+        
+        for i in range(len(resultAnchorBox)): # this for loop goes over the indexes of the resultAnchorBox and puts each result item next to the heading on each iteration as a label widget on the grid.
+            selectedProductInfo = Label(searchResultWindow, text=f"{headingList[i]} : {resultAnchorBox[i]}", justify='left', anchor="w", font=('Courier', 17))
+            selectedProductInfo.grid(row=i+2, column=0, columnspan=2)
+
+    
+            
+    
     
     def getFileDetails(choice): # this function gets the details of the file based on the argument you pass into the choice parameter
         global dataFilePath # set a global dataFilePath
@@ -195,18 +242,18 @@ def window1():
         
     createMainUI() # runs the first main function which in turn runs all the other functions. some functions will run through button click events and others will run if they are called in the other functions
     # this concludes the code of my main program
-
+        
 # Calculator Program Code
 def window2():
-    def calcButtonClick(number):
+    def calcButtonClick(number): # this is a function that takes in the number you press and puts it in the window then puts the next one in the window
         current = calcEntry.get()
         calcEntry.delete(0, END)
         calcEntry.insert(0, str(current) + str(number))
         
-    def calcButtonClear():
+    def calcButtonClear(): # this function clears the entry window
         calcEntry.delete(0, END)
 
-    def calcButtonAdd():
+    def calcButtonAdd(): # this function adds
         firstNumber = calcEntry.get()
         global f_num
         global math
@@ -214,7 +261,7 @@ def window2():
         f_num = int(firstNumber)
         calcEntry.delete(0, END)
 
-    def calcButtonEqual():
+    def calcButtonEqual(): # this function equals everything depending on the operator used
         secondNumber = calcEntry.get()
         calcEntry.delete(0, END)
 
@@ -228,14 +275,14 @@ def window2():
             calcEntry.insert(0, f_num / int(secondNumber))
 
 
-    def calcButtonSubtract():
+    def calcButtonSubtract(): # this function subtracts
         firstNumber = calcEntry.get()
         global f_num
         global math
         math = "subtraction"
         f_num = int(firstNumber)
         calcEntry.delete(0, END)
-    def calcButtonMultiply():
+    def calcButtonMultiply(): # this function multiplies
         firstNumber = calcEntry.get()
         global f_num
         global math
@@ -243,7 +290,7 @@ def window2():
         f_num = int(firstNumber)
         calcEntry.delete(0, END)
 
-    def calcButtonDivide():
+    def calcButtonDivide(): # this function divides
         firstNumber = calcEntry.get()
         global f_num
         global math
@@ -251,14 +298,16 @@ def window2():
         f_num = int(firstNumber)
         calcEntry.delete(0, END)
 
-    def makeCalculatorUI():
-        global calcEntry
-        calculatorWindow = Window(root)
+    def makeCalculatorUI(): # this function creates the User Interface of the calculator
+        global calcEntry # makes the display global and accessible by the other functions so it can be updated
+        calculatorWindow = Window(root) # puts window widget to the calculator Window
         calculatorWindow.title("Welcome to Calculator")
 
 
-        calcEntry = Entry(calculatorWindow, width=25, borderwidth=5)
-
+        calcEntry = Entry(calculatorWindow, width=25, borderwidth=5) # this is calculator display
+        # these are all buttons from 0 to 9 assigned to their variables button then the number
+        # there are the other operator buttons like Clear, Equal, Add, Subtract, Multiply, Divide assigned to the correct button variable
+        #  
         button1 = Button(calculatorWindow, text=1, padx=12, pady=6, command=lambda: calcButtonClick(1))
         button2 = Button(calculatorWindow, text=2, padx=12, pady=6, command=lambda: calcButtonClick(2))
         button3 = Button(calculatorWindow, text=3, padx=12, pady=6, command=lambda: calcButtonClick(3))
@@ -279,7 +328,7 @@ def window2():
         buttonMultiply = Button(calculatorWindow, text='x', padx=12, pady=6, command=calcButtonMultiply)
         buttonDivide = Button(calculatorWindow, text='/', padx=12, pady=6, command=calcButtonDivide)
 
-
+        # this code below here just grids the above lines in their positions on the window.
         calcEntry.grid(row=0, column=0, padx=10, pady=10, columnspan=4)
 
 
@@ -310,7 +359,7 @@ def window2():
             
 
 
-    makeCalculatorUI()
+    makeCalculatorUI() # this is the function call
 
 
 
@@ -379,51 +428,51 @@ def window3():
 
         # this function shows after you press the covid diagnosis button, it counts the ticked checkboxes.
     def showCovidDiagnosis():
-            #making global variables so its accessible outside this particular function
-            global covidQuestionList
-            global varList
-            global goDoctor
-            # set a symtom count variable.
-            # set a empty list to take in all the 0, and 1s to sum later.
-            covidSymptomCount = 0
-            listToSum = []
+        #making global variables so its accessible outside this particular function
+        global covidQuestionList
+        global varList
+        global goDoctor
+        # set a symtom count variable.
+        # set a empty list to take in all the 0, and 1s to sum later.
+        covidSymptomCount = 0
+        listToSum = []
 
-            # 1 this for loop was meant to go over each question with each 1 or 0, to see if its a 1 or a zero then it was meant to add one to the covidSymptom count BUT i used another way
-            for q in covidQuestionList:
-                if q[1].get() == 1:
-                    covidSymptomCount += 1
-                elif q[1].get() == 0:
-                    continue
+        # 1 this for loop was meant to go over each question with each 1 or 0, to see if its a 1 or a zero then it was meant to add one to the covidSymptom count BUT i used another way
+        for q in covidQuestionList:
+            if q[1].get() == 1:
+                covidSymptomCount += 1
+            elif q[1].get() == 0:
+                continue
 
-            # 2 this is the other way that works better, it goes through varlist then appends each item after getting them from each intvar() which is stored in that item.
-            # then makes the covid symptom count equal to the sum of everything in that list.
-            for i in varList:
-                listToSum.append(i.get())
-            covidSymptomCount =  sum(listToSum)
+        # 2 this is the other way that works better, it goes through varlist then appends each item after getting them from each intvar() which is stored in that item.
+        # then makes the covid symptom count equal to the sum of everything in that list.
+        for i in varList:
+            listToSum.append(i.get())
+        covidSymptomCount = sum(listToSum)
 
 
-            # this is the diagnosis message and the diagnosis message changes based on how many boxes you checked, right now its set to some messages but these numbers and messages can be changed as you increase the question list and the developer and health care professional should work together to decide the best diagnoses messages and symtopm counts
-            if covidSymptomCount == 0:
-                covidMsg = 'You should stay at home but you dont have any symptoms of covid'
-                goDoctor == False
-            elif covidSymptomCount < 3:
-                covidMsg = 'You should see a doctor if your symptoms get worse'
-            elif covidSymptomCount >= 3:
-                covidMsg = 'You should see a doctor ASAP'
-                goDoctor == True
+        # this is the diagnosis message and the diagnosis message changes based on how many boxes you checked, right now its set to some messages but these numbers and messages can be changed as you increase the question list and the developer and health care professional should work together to decide the best diagnoses messages and symtopm counts
+        if covidSymptomCount == 0:
+            covidMsg = 'You should stay at home but you dont have any symptoms of covid'
+            goDoctor == False
+        elif covidSymptomCount < 3:
+            covidMsg = 'You should see a doctor if your symptoms get worse'
+        elif covidSymptomCount >= 3:
+            covidMsg = 'You should see a doctor ASAP'
+            goDoctor == True
 
-            #this is the diagnosis string placed on the screen using a tkinter Label
-            diagLabel = Label(covidQuestionWindow, text=f"You have {covidSymptomCount} Covid Symptoms. {covidMsg}")
-            diagLabel.grid(row=10, column=0)
+        #this is the diagnosis string placed on the screen using a tkinter Label
+        diagLabel = Label(covidQuestionWindow, text=f"You have {covidSymptomCount} Covid Symptoms. {covidMsg}")
+        diagLabel.grid(row=10, column=0)
             
-    covidMainWindowUI()    
+    covidMainWindowUI()    # function call
 
 
 
 
 
 
-def our_command():
+def our_command(): # this is a dummy function that doesnt do anything its to use for testing button click events.
     pass
 
 
@@ -432,47 +481,40 @@ def our_command():
 
 
 
-my_menu = Menu(root)
-root.config(menu=my_menu)
+my_menu = Menu(root) # create menu
+root.config(menu=my_menu) # configure menu
 
+# about message for message box
 aboutMessage = """
-    Version: 1.00
-    Produced for Software Development L2 Diploma
-    Main Project: Search
-"""
-
-helpMessage ="""
-    This program includes
-    A PROTOTYPE program to Search through CSVs
-    A PROTOTYPE program to do simple calculations
-    A PROTOTYPE program to see if someone has covid
+    Version: 2.00
 """
 
 
 #Create a menu item
 
-program_menu = Menu(my_menu)
-my_menu.add_cascade(label="Programs", menu=program_menu)
-program_menu.add_command(label="Search Program", command=window1)
+program_menu = Menu(my_menu) # assign menu widget to program menu variable
+my_menu.add_cascade(label="Programs", menu=program_menu)# add program menu to cascade 
+program_menu.add_command(label="Search Program", command=window1) # add three commands to program menu, these commands are the functions for each search
 program_menu.add_command(label="Calculator", command=window2)
 program_menu.add_command(label="Covid Diagnoser", command=window3)
 
 #Create an help Menu Item
 
-help_menu = Menu(my_menu)
-my_menu.add_cascade(label="Help", menu=help_menu)
-help_menu.add_command(label="Help page", command=lambda: messagebox.showinfo("Software", helpMessage))
+help_menu = Menu(my_menu) # add Menu widget to help menu variable which connects opens a pdf in the broswer from the link provided in the openHelp function's paramter as an argument.
+my_menu.add_cascade(label="Help", menu=help_menu) # adds help menu cascade to the main manu which is called my menu
+help_menu.add_command(label="Help page", command=lambda: messagebox.showinfo("Software", aboutMessage))# this menu item has a command that opens the broswer and loads the given address
+
 #Create an about Menu Item
 
-about_menu = Menu(my_menu)
-my_menu.add_cascade(label="About", menu=about_menu)
-about_menu.add_command(label="About", command=lambda: messagebox.showinfo("Software", aboutMessage))
+about_menu = Menu(my_menu) # add menu widget to about menu variable
+my_menu.add_cascade(label="About", menu=about_menu) # adds about menu to the cascade
+about_menu.add_command(label="About", command=lambda: messagebox.showinfo("Software", aboutMessage)) # the about menu adds comand which requiores a lambda and in the comand is teh messagebox and it shows my 'company name' and about message
 
 # creating exit menu item
 
-exit_menu = Menu(my_menu)
-my_menu.add_cascade(label="Exit Menu", menu=exit_menu)
-exit_menu.add_command(label="Close", command=root.quit)
+exit_menu = Menu(my_menu) # add menu widget to exit menu variable
+my_menu.add_cascade(label="Exit Menu", menu=exit_menu) # add to cascade
+exit_menu.add_command(label="Close", command=root.quit) # root.quit in the command makes the window quit
 
 
 
