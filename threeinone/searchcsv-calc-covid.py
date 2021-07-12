@@ -21,7 +21,7 @@ global r
 
 labelWelcomeRoot = Label(root, text="Welcome to my Software Development Project", pady=14) # assign label
 labelWelcomeRoot.pack() # pack the label to root
-buttonQuit = Button(root, text="Exit Program", command=root.quit) # assign button() widget to buttonQuit variable, put it in root, set text and set the command to root.quit, so the program closes when you press this
+buttonQuit = Button(root, text="Exit Program", command=root.destroy) # assign button() widget to buttonQuit variable, put it in root, set text and set the command to root.quit, so the program closes when you press this
 buttonQuit.pack()
 
 #class to create instance to make windows from
@@ -98,7 +98,7 @@ def window1():
         # so when you click these buttons the command functions run. the openFileButton uses a lambda which allows us to pass in an argument into the parameter where it wouldnt normally be able to
         openFileButton = Button(MainWindow, text="Open File", command=lambda: getFileDetails("fileName")).grid(row=2, column=0, columnspan=2)
         continueButton = Button(MainWindow, text="Continue", command=createSearchFieldsUI).grid(row=6, column=1)
-        quitButton = Button(MainWindow, text="Quit", command=root.quit).grid(row=6, column=0) # this button quits root, and shuts down the program.
+        quitButton = Button(MainWindow, text="Quit", command=root.destroy).grid(row=6, column=0) # this button quits root, and shuts down the program.
         
 
     def createSearchFieldsUI(): # this defines a function called createSearchFieldsUI()
@@ -380,7 +380,7 @@ def window3():
 
 
         covidContinueButton = Button(covidDiagnosisWindow, text="Continue", command=covidQuestionPage).grid(row=10, column=1)
-        covidQuitButton = Button(covidDiagnosisWindow, text="Quit", command=root.quit).grid(row=10, column=0)
+        covidQuitButton = Button(covidDiagnosisWindow, text="Quit", command=root.destroy).grid(row=10, column=0)
 
     
     # This function makes the Question window using window(root). adds title and a label asking to tick all symptoms fromt the list
@@ -514,7 +514,7 @@ about_menu.add_command(label="About", command=lambda: messagebox.showinfo("Softw
 
 exit_menu = Menu(my_menu) # add menu widget to exit menu variable
 my_menu.add_cascade(label="Exit Menu", menu=exit_menu) # add to cascade
-exit_menu.add_command(label="Close", command=root.quit) # root.quit in the command makes the window quit
+exit_menu.add_command(label="Close", command=root.destroy) # root.quit in the command makes the window quit
 
 
 
